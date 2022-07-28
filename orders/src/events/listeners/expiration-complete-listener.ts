@@ -4,6 +4,9 @@ import { queueGroupName } from './queue-group-name';
 import { Order } from '../../models/order';
 import { OrderCancelledPublisher } from '../publishers/order-cancelled-publisher';
 
+/**
+ * 1. add a check to avoid cancel payed order 
+ */
 export class ExpirationCompleteListener extends Listener<ExpirationCompleteEvent> {
   subject: Subjects.ExpirationComplete = Subjects.ExpirationComplete;
   queueGroupName = queueGroupName;
@@ -14,7 +17,11 @@ export class ExpirationCompleteListener extends Listener<ExpirationCompleteEvent
     if (!order) {
       throw new Error('Order not found');
     }
-    
+
+    if (order.status === OrderStatus.Complete) {
+      return msg.ack();
+    }
+
     order.set({
       status: OrderStatus.Cancelled,
     });

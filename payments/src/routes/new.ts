@@ -3,6 +3,9 @@ import { body } from 'express-validator';
 import { requireAuth, validateRequest, BadRequestError, NotFoundError, NotAuthorizedError, OrderStatus } from '@cjztickets/common';
 import { stripe } from '../stripe';
 import { Order } from '../models/order';
+import { Payment } from '../models/payment';
+import { PaymentCreatedPublisher } from '../events/publishers/payment-created-publisher';
+import { natsWrapper } from '../nats-wrapper';
 
 const router = express.Router();
 
@@ -32,13 +35,23 @@ router.post('/api/payments',
     }
 
     // use stripe libray and call api to create charge
-    await stripe.charges.create({
+    const charge = await stripe.charges.create({
       currency: 'usd',
       amount: order.price * 100,
       source: token
     });
+    const payment = Payment.build({
+      orderId,
+      stripeId: charge.id
+    });
+    await payment.save();
+    new PaymentCreatedPublisher(natsWrapper.client).publish({
+      id: payment.id,
+      orderId: payment.orderId,
+      stripeId: payment.stripeId
+    });
 
-    res.send({ success: true });
+    res.status(201).send({ id: payment.id });
 
   });
 
