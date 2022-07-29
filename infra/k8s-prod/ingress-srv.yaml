@@ -7,6 +7,7 @@ metadata:
     nginx.ingress.kubernetes.io/use-regex: 'true'
 spec:
   rules:
+    # will changer here when have a new DNS
     - host: ticketing.dev
       http:
         paths:
