@@ -4,11 +4,11 @@ import { useState } from 'react';
 export default ({ url, method, body, onSuccess }) => {
   const [errors, setErrors] = useState(null);
 
-  const doRequest = async () => {
+  const doRequest = async (props = {}) => {
     try {
       //reset the error useState
       setErrors(null);
-      const response = await axios[method](url, body);
+      const response = await axios[method](url, { ...body, ...props });
 
       if(onSuccess) {
         onSuccess(response.data);
@@ -26,6 +26,10 @@ export default ({ url, method, body, onSuccess }) => {
       );
     }
   };
-
+  /**
+   * doRequest: a function evoke and run the request
+   * error: a block of JSX, will capture all the errors will coming back from the api, and render out them out as
+   * nice look JSX
+   */
   return { doRequest, errors };
 };
