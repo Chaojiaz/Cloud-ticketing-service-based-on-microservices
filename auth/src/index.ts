@@ -20,7 +20,7 @@ const start = async () => {
 
   // if pass the try/catch successfully, it is time to listen to traffic.
   app.listen(3000, () => {
-    console.log('Listening on port 3000!!!!!!!');
+    console.log('Listening on port 3000!!!!');
   });
 };
 
